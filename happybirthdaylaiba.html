@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Love Laiba</title>
+    <title>Birthday for Laiba</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -48,25 +48,23 @@
         #love-message {
             position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) scale(0);
             font-family: 'Dancing Script', cursive; font-size: 6rem; color: #ff4d6d;
-            text-shadow: 0 0 20px rgba(255, 77, 109, 0.8); z-index: 100;
-            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none; text-align: center; width: 100%;
+            text-shadow: 0 0 30px rgba(255, 77, 109, 0.9); z-index: 100;
+            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; text-align: center; width: 100%; opacity: 0;
         }
 
-        /* --- ROSE PETALS & HEARTS --- */
-        .petal, .heart { position: absolute; top: -50px; z-index: 50; opacity: 0.8; pointer-events: none; }
-        .heart { font-size: 2rem; color: #ff0000; }
+        /* --- ELEMENTS --- */
+        .petal, .balloon, .heart { position: absolute; pointer-events: none; }
+        .balloon { pointer-events: auto; z-index: 10; cursor: pointer; }
+        .heart { font-size: 2.5rem; color: #ff0000; z-index: 60; }
+        .petal { z-index: 15; background-color: #ff4d6d; border-radius: 150% 0 150% 0; opacity: 0.7; }
 
         /* --- ANIMATIONS --- */
         @keyframes fallDown { 0% { top: -150px; opacity: 1; } 100% { top: 80%; opacity: 1; } }
         @keyframes dropSign { 0% { top: -500px; } 100% { top: 0; } }
         @keyframes swing { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
-        @keyframes floatUp { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
-        
-        @keyframes petalFall {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(100px, 110vh) rotate(720deg); }
-        }
+        @keyframes floatUp { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } }
+        @keyframes petalFall { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(100px, 110vh) rotate(720deg); } }
 
         .anim-fall-cake { animation: fallDown 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .anim-drop-rope { animation: dropSign 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -102,11 +100,15 @@
             const loveMsg = document.getElementById('love-message');
 
             let cakesEaten = 0;
+            let petalInterval, balloonInterval;
+            let currentBalloons = [];
+            let currentPetals = [];
 
             const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-            async function startAnimation() {
+            async function start() {
                 startRosePetals();
+                releaseBalloons();
                 for(let cake of cakes) {
                     cake.classList.add('anim-fall-cake');
                     await wait(800);
@@ -129,22 +131,38 @@
                         else if(bites === 3) {
                             cake.classList.add('eaten');
                             cakesEaten++;
-                            if(cakesEaten === 3) showFinalSurprise();
+                            if(cakesEaten === 3) finishTheShow();
                         }
                     });
                 });
             }
 
-            function showFinalSurprise() {
-                loveMsg.style.transform = "translate(-50%, -50%) scale(1)";
-                // Start floating hearts
+            function finishTheShow() {
+                // Clear intervals
+                clearInterval(petalInterval);
+                
+                // Remove existing balloons and petals with a fade
+                document.querySelectorAll('.balloon, .petal').forEach(el => {
+                    el.style.transition = 'opacity 1s';
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 1000);
+                });
+
+                // Show I Love You
+                setTimeout(() => {
+                    loveMsg.style.opacity = "1";
+                    loveMsg.style.transform = "translate(-50%, -50%) scale(1)";
+                    startHearts();
+                }, 500);
+            }
+
+            function startHearts() {
                 setInterval(() => {
                     const heart = document.createElement('div');
                     heart.innerHTML = '❤️';
                     heart.className = 'heart';
                     heart.style.left = Math.random() * 100 + 'vw';
-                    heart.style.bottom = '0';
-                    heart.style.top = 'auto'; // Reset top
+                    heart.style.bottom = '-50px';
                     heart.style.animation = `floatUp ${3 + Math.random() * 2}s linear forwards`;
                     stage.appendChild(heart);
                     setTimeout(() => heart.remove(), 5000);
@@ -152,20 +170,38 @@
             }
 
             function startRosePetals() {
-                setInterval(() => {
+                petalInterval = setInterval(() => {
                     const petal = document.createElement('div');
                     petal.className = 'petal';
                     const size = Math.random() * 15 + 10 + 'px';
                     petal.style.width = size; petal.style.height = size;
                     petal.style.left = Math.random() * 100 + 'vw';
-                    const speed = 4 + Math.random() * 4;
+                    petal.style.top = '-20px';
+                    const speed = 5 + Math.random() * 5;
                     petal.style.animation = `petalFall ${speed}s linear forwards`;
                     stage.appendChild(petal);
                     setTimeout(() => petal.remove(), speed * 1000);
-                }, 250);
+                }, 300);
             }
 
-            startAnimation();
+            function releaseBalloons() {
+                const colors = ['#FF5252', '#448AFF', '#00E676', '#FFD740', '#D500F9'];
+                for (let i = 0; i < 20; i++) {
+                    const b = document.createElement('div');
+                    b.className = 'balloon';
+                    b.style.width = '50px'; b.style.height = '65px';
+                    b.style.borderRadius = '50%';
+                    b.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+                    b.style.left = Math.random() * 90 + '%';
+                    b.style.bottom = '-100px';
+                    b.style.animation = `floatUp ${6 + Math.random()*6}s linear infinite`;
+                    b.style.animationDelay = Math.random() * 8 + 's';
+                    b.onclick = () => { b.style.transform = 'scale(2)'; b.style.opacity = '0'; };
+                    stage.appendChild(b);
+                }
+            }
+
+            start();
         });
     </script>
 </body>
